@@ -253,6 +253,9 @@ export default class SiyuanDoctreeFakeSubfolder extends Plugin {
         const isSpecialClick = !!(clickedToggle || clickedIcon);
         /*                     ^ cast to bool */
 
+        // Check if Ctrl key is pressed
+        const isCtrlPressed = (e as MouseEvent).ctrlKey;
+
         if (!nodeId || !this.mode) {
           return;
         }
@@ -260,6 +263,19 @@ export default class SiyuanDoctreeFakeSubfolder extends Plugin {
         switch (this.mode) {
           case DocTreeFakeSubfolderMode.Normal:
             if (!isSpecialClick) {
+              // If Ctrl key is pressed, open document normally
+              if (isCtrlPressed) {
+                const newEvent = new MouseEvent("click", {
+                  bubbles: true,
+                  cancelable: true,
+                });
+                Object.defineProperty(newEvent, "sf_openDoc", {
+                  value: true,
+                });
+                listItem.dispatchEvent(newEvent);
+                return false;
+              }
+
               // cache settings in case if more chaotic
               const enableEmoji = this.settingUtils.get(
                 "enable_using_emoji_as_subfolder_identify"
